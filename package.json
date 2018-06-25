@@ -1,0 +1,20 @@
+{
+  "name": "comprehensive",
+  "version": "0.1.0",
+  "main": "comprehensive.js",
+  "scripts": {
+    "test": "jest",
+    "build": "tsc",
+    "checksize": "uglifyjs dist/comprehensive.js dist/util.js -mc --toplevel | gzip -9 | wc -c"
+  },
+  "keywords": [],
+  "author": "Aidan Oldershaw",
+  "license": "ISC",
+  "dependencies": {},
+  "devDependencies": {
+    "@types/jest": "^23.1.1",
+    "jest": "^23.1.0",
+    "ts-jest": "^22.4.6"
+  },
+  "description": "Python-inspired object (dictionary) comprehension in JavaScript"
+}
