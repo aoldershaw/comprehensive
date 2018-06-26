@@ -15,7 +15,6 @@ const ages = toObj`{person.name: person.age for person of ${people}}`;
 or
 
 ```
-// Curly brackets are optional
 const ages = toObj`{it.name: it.age over ${people}}`;
 ```
 
