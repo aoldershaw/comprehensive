@@ -1,6 +1,5 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var util_1 = require("./util");
 // Matches 'for name of' strings
 var FOR_REGEX = /^for\s+([A-Za-z_\$][A-Za-z0-9-_\$]*)\s+of/;
 // Matches property chains (e.g. anObject.subObject.property)
@@ -16,17 +15,23 @@ function handleReference(ref, context) {
     }
     return cur;
 }
+function ltrim(s, c) {
+    return s.replace(new RegExp("^" + c + "+"), '');
+}
+function isFunction(o) {
+    return typeof o === 'function';
+}
 function evaluateKeyExpression(ke, entry, context, isReference) {
     if (isReference)
         return handleReference(ke, context);
-    if (util_1.isFunction(ke))
+    if (isFunction(ke))
         return ke(entry);
     return ke;
 }
 function evaluateValueExpression(ve, entry, context, isReference) {
     if (isReference)
         return handleReference(ve, context);
-    if (util_1.isFunction(ve))
+    if (isFunction(ve))
         return ve(entry);
     return ve;
 }
@@ -53,7 +58,7 @@ function toObj(strings) {
     for (var _i = 1; _i < arguments.length; _i++) {
         values[_i - 1] = arguments[_i];
     }
-    var s = util_1.ltrim(strings[0].trim(), '{').trim();
+    var s = ltrim(strings[0].trim(), '{').trim();
     var valueIndex = 0;
     var stringIndex = 1;
     var hasKeyExpression = s.length === 0;
@@ -75,7 +80,7 @@ function toObj(strings) {
     var value;
     if (hasValueExpression) {
         value = values[valueIndex++];
-        if (value == null)
+        if (!value)
             throw new Error("Expecting a value");
         s = strings[stringIndex++].trim();
     }

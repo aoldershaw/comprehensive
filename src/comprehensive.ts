@@ -1,5 +1,3 @@
-import { isFunction, ltrim } from "./util";
-
 // Matches 'for name of' strings
 const FOR_REGEX = /^for\s+([A-Za-z_\$][A-Za-z0-9-_\$]*)\s+of/;
 // Matches property chains (e.g. anObject.subObject.property)
@@ -28,6 +26,14 @@ function handleReference(ref: Reference, context: Context): any {
         if(cur === undefined) return cur;
     }
     return cur;
+}
+
+function ltrim(s: string, c: string) {
+    return s.replace(new RegExp(`^${c}+`), '');
+}
+
+function isFunction(o: any) {
+    return typeof o === 'function';
 }
 
 function evaluateKeyExpression(ke: KeyExpression, entry: any, context: Context, isReference: boolean): string {
