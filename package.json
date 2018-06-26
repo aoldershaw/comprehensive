@@ -1,10 +1,10 @@
 {
   "name": "comprehensive",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "main": "dist/comprehensive.js",
   "files": [
-      "/dist/comprehensive.js",
-      "/dist/comprehensive.js.map"
+    "/dist/comprehensive.js",
+    "/dist/comprehensive.js.map"
   ],
   "scripts": {
     "test": "jest",
@@ -13,18 +13,28 @@
     "minify": "uglifyjs dist/comprehensive.js -mc --toplevel > dist/comprehensive.min.js",
     "checksize": "uglifyjs dist/comprehensive.js -mc --toplevel | gzip -9 | wc -c"
   },
-  "keywords": ["comprehensive", "object", "dictionary", "comprehension", "template", "literal", "python"],
+  "keywords": [
+    "comprehensive",
+    "object",
+    "dictionary",
+    "comprehension",
+    "template",
+    "literal",
+    "python"
+  ],
   "author": "Aidan Oldershaw <aidan.oldershaw@mail.mcgill.ca>",
   "license": "MIT",
   "dependencies": {},
   "devDependencies": {
     "@types/jest": "^23.1.1",
+    "awesome-typescript-loader": "^5.2.0",
     "jest": "^23.1.0",
-    "ts-jest": "^22.4.6"
+    "ts-jest": "^22.4.6",
+    "typescript": "^2.9.2"
   },
   "description": "Python-inspired object (dictionary) comprehension in JavaScript",
   "repository": {
-      "type": "git",
-      "url": "https://github.com/aoldershaw/comprehensive.git"
+    "type": "git",
+    "url": "https://github.com/aoldershaw/comprehensive.git"
   }
 }

@@ -30,11 +30,7 @@ const ages = toObj`${p => p.name}: ${p => p.age} over ${people}`
 $ npm install comprehensive
 ```
 
-You can also include [dist/comprehensive.min.js](https://github.com/aoldershaw/comprehensive/blob/master/dist/comprehensive.min.js) in your project or browser
-
-```
-<script src="comprehensive.min.js"></script>
-```
+You can also include [dist/comprehensive.min.js](https://github.com/aoldershaw/comprehensive/blob/master/dist/comprehensive.min.js) in your project.
 
 ## Usage
 Basic syntax is as follows:
