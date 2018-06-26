@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-// Matches 'for name of' strings
+// Matches 'for name of' strings, and captures the variable name
 var FOR_REGEX = /^for\s+([A-Za-z_\$][A-Za-z0-9-_\$]*)\s+of/;
 // Matches property chains (e.g. anObject.subObject.property)
 var FIELD_REGEX = /^[A-Za-z_$][A-Za-z0-9-_$]*(?:\.[A-Za-z_$][A-Za-z0-9-_$]*)*/;
@@ -111,6 +111,7 @@ function toObjSafe(strings) {
         values[_i - 1] = arguments[_i];
     }
     try {
+        // @ts-ignore
         return toObj.apply(void 0, [strings].concat(values));
     }
     catch (err) {

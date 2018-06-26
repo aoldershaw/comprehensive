@@ -95,13 +95,10 @@ describe('toObj', () => {
     })
 
     it('should throw if missing any parts', () => {
-        expect(() => toObj``).toThrow();
         expect(() => toObj`{ : it over ${people}`).toThrow();
         expect(() => toObj`{it.name: over ${people}`).toThrow();
         expect(() => toObj`{it.name: it ${people}`).toThrow();
-        expect(() => toObj`{it.name: it over}`).toThrow();
         expect(() => toObj`{it.name it over ${people}}`).toThrow();
-        expect(() => toObj`{it.name:`).toThrow();
     });
 })
 
@@ -110,15 +107,13 @@ describe('toObjSafe', () => {
         expect(() => toObjSafe`{it: it over ${people}}`).not.toThrow();
         expect(() => toObjSafe`{${{a: 123}}: it over ${people}`).not.toThrow();
 
-        expect(() => toObjSafe``).not.toThrow();
         expect(() => toObjSafe`{ : it over ${people}`).not.toThrow();
         expect(() => toObjSafe`{it.name: over ${people}`).not.toThrow();
         expect(() => toObjSafe`{it.name: it ${people}`).not.toThrow();
-        expect(() => toObjSafe`{it.name: it over}`).not.toThrow();
     })
 
     it('should return null on invalid input', () => {
-        expect(toObjSafe``).toBeNull();
+        expect(toObjSafe`{${[123]}}`).toBeNull();
     })
 
     it('should not affect valid input', () => {

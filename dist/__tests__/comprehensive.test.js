@@ -82,31 +82,26 @@ describe('toObj', function () {
         expect(function () { return comprehensive_1.toObj(templateObject_22 || (templateObject_22 = __makeTemplateObject(["{it.age: it over ", ""], ["{it.age: it over ", ""])), people); }).not.toThrow();
     });
     it('should throw if missing any parts', function () {
-        expect(function () { return comprehensive_1.toObj(templateObject_23 || (templateObject_23 = __makeTemplateObject([""], [""]))); }).toThrow();
-        expect(function () { return comprehensive_1.toObj(templateObject_24 || (templateObject_24 = __makeTemplateObject(["{ : it over ", ""], ["{ : it over ", ""])), people); }).toThrow();
-        expect(function () { return comprehensive_1.toObj(templateObject_25 || (templateObject_25 = __makeTemplateObject(["{it.name: over ", ""], ["{it.name: over ", ""])), people); }).toThrow();
-        expect(function () { return comprehensive_1.toObj(templateObject_26 || (templateObject_26 = __makeTemplateObject(["{it.name: it ", ""], ["{it.name: it ", ""])), people); }).toThrow();
-        expect(function () { return comprehensive_1.toObj(templateObject_27 || (templateObject_27 = __makeTemplateObject(["{it.name: it over}"], ["{it.name: it over}"]))); }).toThrow();
-        expect(function () { return comprehensive_1.toObj(templateObject_28 || (templateObject_28 = __makeTemplateObject(["{it.name it over ", "}"], ["{it.name it over ", "}"])), people); }).toThrow();
-        expect(function () { return comprehensive_1.toObj(templateObject_29 || (templateObject_29 = __makeTemplateObject(["{it.name:"], ["{it.name:"]))); }).toThrow();
+        expect(function () { return comprehensive_1.toObj(templateObject_23 || (templateObject_23 = __makeTemplateObject(["{ : it over ", ""], ["{ : it over ", ""])), people); }).toThrow();
+        expect(function () { return comprehensive_1.toObj(templateObject_24 || (templateObject_24 = __makeTemplateObject(["{it.name: over ", ""], ["{it.name: over ", ""])), people); }).toThrow();
+        expect(function () { return comprehensive_1.toObj(templateObject_25 || (templateObject_25 = __makeTemplateObject(["{it.name: it ", ""], ["{it.name: it ", ""])), people); }).toThrow();
+        expect(function () { return comprehensive_1.toObj(templateObject_26 || (templateObject_26 = __makeTemplateObject(["{it.name it over ", "}"], ["{it.name it over ", "}"])), people); }).toThrow();
     });
 });
 describe('toObjSafe', function () {
     it('should not throw', function () {
-        expect(function () { return comprehensive_1.toObjSafe(templateObject_30 || (templateObject_30 = __makeTemplateObject(["{it: it over ", "}"], ["{it: it over ", "}"])), people); }).not.toThrow();
-        expect(function () { return comprehensive_1.toObjSafe(templateObject_31 || (templateObject_31 = __makeTemplateObject(["{", ": it over ", ""], ["{", ": it over ", ""])), { a: 123 }, people); }).not.toThrow();
-        expect(function () { return comprehensive_1.toObjSafe(templateObject_32 || (templateObject_32 = __makeTemplateObject([""], [""]))); }).not.toThrow();
-        expect(function () { return comprehensive_1.toObjSafe(templateObject_33 || (templateObject_33 = __makeTemplateObject(["{ : it over ", ""], ["{ : it over ", ""])), people); }).not.toThrow();
-        expect(function () { return comprehensive_1.toObjSafe(templateObject_34 || (templateObject_34 = __makeTemplateObject(["{it.name: over ", ""], ["{it.name: over ", ""])), people); }).not.toThrow();
-        expect(function () { return comprehensive_1.toObjSafe(templateObject_35 || (templateObject_35 = __makeTemplateObject(["{it.name: it ", ""], ["{it.name: it ", ""])), people); }).not.toThrow();
-        expect(function () { return comprehensive_1.toObjSafe(templateObject_36 || (templateObject_36 = __makeTemplateObject(["{it.name: it over}"], ["{it.name: it over}"]))); }).not.toThrow();
+        expect(function () { return comprehensive_1.toObjSafe(templateObject_27 || (templateObject_27 = __makeTemplateObject(["{it: it over ", "}"], ["{it: it over ", "}"])), people); }).not.toThrow();
+        expect(function () { return comprehensive_1.toObjSafe(templateObject_28 || (templateObject_28 = __makeTemplateObject(["{", ": it over ", ""], ["{", ": it over ", ""])), { a: 123 }, people); }).not.toThrow();
+        expect(function () { return comprehensive_1.toObjSafe(templateObject_29 || (templateObject_29 = __makeTemplateObject(["{ : it over ", ""], ["{ : it over ", ""])), people); }).not.toThrow();
+        expect(function () { return comprehensive_1.toObjSafe(templateObject_30 || (templateObject_30 = __makeTemplateObject(["{it.name: over ", ""], ["{it.name: over ", ""])), people); }).not.toThrow();
+        expect(function () { return comprehensive_1.toObjSafe(templateObject_31 || (templateObject_31 = __makeTemplateObject(["{it.name: it ", ""], ["{it.name: it ", ""])), people); }).not.toThrow();
     });
     it('should return null on invalid input', function () {
-        expect(comprehensive_1.toObjSafe(templateObject_37 || (templateObject_37 = __makeTemplateObject([""], [""])))).toBeNull();
+        expect(comprehensive_1.toObjSafe(templateObject_32 || (templateObject_32 = __makeTemplateObject(["{", "}"], ["{", "}"])), [123])).toBeNull();
     });
     it('should not affect valid input', function () {
-        expect(comprehensive_1.toObjSafe(templateObject_38 || (templateObject_38 = __makeTemplateObject(["{it.name: it over ", "}"], ["{it.name: it over ", "}"])), people)).toMatchObject(comprehensive_1.toObj(templateObject_39 || (templateObject_39 = __makeTemplateObject(["{it.name: it over ", "}"], ["{it.name: it over ", "}"])), people));
+        expect(comprehensive_1.toObjSafe(templateObject_33 || (templateObject_33 = __makeTemplateObject(["{it.name: it over ", "}"], ["{it.name: it over ", "}"])), people)).toMatchObject(comprehensive_1.toObj(templateObject_34 || (templateObject_34 = __makeTemplateObject(["{it.name: it over ", "}"], ["{it.name: it over ", "}"])), people));
     });
 });
-var templateObject_1, templateObject_2, templateObject_3, templateObject_4, templateObject_5, templateObject_6, templateObject_7, templateObject_8, templateObject_9, templateObject_10, templateObject_11, templateObject_12, templateObject_13, templateObject_14, templateObject_15, templateObject_16, templateObject_17, templateObject_18, templateObject_19, templateObject_20, templateObject_21, templateObject_22, templateObject_23, templateObject_24, templateObject_25, templateObject_26, templateObject_27, templateObject_28, templateObject_29, templateObject_30, templateObject_31, templateObject_32, templateObject_33, templateObject_34, templateObject_35, templateObject_36, templateObject_37, templateObject_38, templateObject_39;
+var templateObject_1, templateObject_2, templateObject_3, templateObject_4, templateObject_5, templateObject_6, templateObject_7, templateObject_8, templateObject_9, templateObject_10, templateObject_11, templateObject_12, templateObject_13, templateObject_14, templateObject_15, templateObject_16, templateObject_17, templateObject_18, templateObject_19, templateObject_20, templateObject_21, templateObject_22, templateObject_23, templateObject_24, templateObject_25, templateObject_26, templateObject_27, templateObject_28, templateObject_29, templateObject_30, templateObject_31, templateObject_32, templateObject_33, templateObject_34;
 //# sourceMappingURL=comprehensive.test.js.map

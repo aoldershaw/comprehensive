@@ -1,4 +1,4 @@
-// Matches 'for name of' strings
+// Matches 'for name of' strings, and captures the variable name
 const FOR_REGEX = /^for\s+([A-Za-z_\$][A-Za-z0-9-_\$]*)\s+of/;
 // Matches property chains (e.g. anObject.subObject.property)
 const FIELD_REGEX = /^[A-Za-z_$][A-Za-z0-9-_$]*(?:\.[A-Za-z_$][A-Za-z0-9-_$]*)*/
@@ -65,7 +65,12 @@ function parseFieldName(s: string): string {
     }
 }
 
-export function toObj(strings: TemplateStringsArray, ...values: Array<any>) {
+export function toObj(strings: TemplateStringsArray, array: Array<any>): object;
+export function toObj(strings: TemplateStringsArray, key: KeyExpression, array: Array<any>): object;
+export function toObj(strings: TemplateStringsArray, value: ValueExpression, array: Array<any>): object;
+export function toObj(strings: TemplateStringsArray, key: KeyExpression, value: ValueExpression, array: Array<any>): object;
+
+export function toObj(strings: TemplateStringsArray, ...values: Array<any>): object {
     let s = ltrim(strings[0].trim(), '{').trim();
     let valueIndex = 0;
     let stringIndex = 1;
@@ -106,8 +111,14 @@ export function toObj(strings: TemplateStringsArray, ...values: Array<any>) {
     return object;
 }
 
-export function toObjSafe(strings: TemplateStringsArray, ...values: Array<any>) {
+export function toObjSafe(strings: TemplateStringsArray, array: Array<any>): object;
+export function toObjSafe(strings: TemplateStringsArray, key: KeyExpression, array: Array<any>): object;
+export function toObjSafe(strings: TemplateStringsArray, value: ValueExpression, array: Array<any>): object;
+export function toObjSafe(strings: TemplateStringsArray, key: KeyExpression, value: ValueExpression, array: Array<any>): object;
+
+export function toObjSafe(strings: TemplateStringsArray, ...values: Array<any>): object {
     try {
+        // @ts-ignore
         return toObj(strings, ...values);
     } catch(err) {
         return null;
