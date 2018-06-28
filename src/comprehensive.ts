@@ -1,5 +1,5 @@
-// Matches 'for name of' strings, and captures the variable name
-const FOR_REGEX = /^for\s+([A-Za-z_\$][A-Za-z0-9-_\$]*)\s+of/;
+// Matches 'for name1, name2, ... of' strings, and captures the variable name(s)
+const FOR_REGEX = /^for\s+([A-Za-z_\$][A-Za-z0-9-_\$]*(\s*,\s*[A-Za-z_\$][A-Za-z0-9-_\$]*)*)\s+of/;
 // Matches property chains (e.g. anObject.subObject.property)
 const FIELD_REGEX = /^[A-Za-z_$][A-Za-z0-9-_$]*(?:\.[A-Za-z_$][A-Za-z0-9-_$]*)*/
 
@@ -13,8 +13,8 @@ interface Reference {
 
 type Key = string | Reference;
 type Value = string | number | boolean | Object | Array<any>;
-type KeyFunction = (any) => string;
-type ValueFunction = (any) => Value;
+type KeyFunction = (arg: any) => string;
+type ValueFunction = (arg: any) => Value;
 type KeyExpression = KeyFunction | Reference | string;
 type ValueExpression = ValueFunction | Reference | Value
 
@@ -54,14 +54,15 @@ function parseRef(s: string): Reference {
     return {expr: match[0]};
 }
 
-function parseFieldName(s: string): string {
+function parseFieldNames(s: string): string[] {
     let match;
     if(s.substr(0, 4) === 'over') {
-        return 'it';
+        return ['it'];
     } else if((match = FOR_REGEX.exec(s)) != null) {
-        return match[1];
+        const names = match[1].split(',').map(s => s.trim());
+        return names;
     } else {
-        throw new Error("Invalid iteration operator. Expecting either 'for ... of' or 'over'")
+        throw new Error("Invalid iteration operator. Expecting either 'for ... of' or 'over', provided " + s)
     }
 }
 
@@ -96,13 +97,21 @@ export function toObj(strings: TemplateStringsArray, ...values: Array<any>): obj
         value = parseRef(s);
         s = s.substr((<Reference> value).expr.length).trim();
     }
-    const fieldName = parseFieldName(s);
+    const fieldNames = parseFieldNames(s);
+    const hasMultipleFields = fieldNames.length > 1;
     const object = {};
     const context: Context = {};
     const list = values[valueIndex]
     if(list == null || !Array.isArray(list)) throw new Error(`An invalid array was passed (provided ${list})`);
     for(const entry of list) {
-        context[fieldName] = entry;
+        if(hasMultipleFields) {
+            if(entry == null || !Array.isArray(entry) || entry.length !== fieldNames.length)
+                throw new Error(`Cannot spread value ${entry} into fields [${fieldNames.join(', ')}]`)
+            for(let i = 0; i < fieldNames.length; i++)
+                context[fieldNames[i]] = entry[i];
+        } else {
+            context[fieldNames[0]] = entry;
+        }
         const curKey = evaluateKeyExpression(key, entry, context, !hasKeyExpression);
         if(typeof curKey !== 'string' && typeof curKey !== 'number')
             throw new Error('Key must be either a string or a number, not a(n) ' + typeof curKey);

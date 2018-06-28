@@ -25,6 +25,18 @@ or
 const ages = toObj`${p => p.name}: ${p => p.age} over ${people}`
 ```
 
+You can automatically unpack values from fixed-size nested arrays, which is particularly useful for iterating over another object.
+
+```
+const people = {
+    ABC: {name: 'Aidan', age: 20},
+    DEF: {name: 'Becca', age: 21}
+}
+
+const idMap = toObj`{id: person.name for id, person of ${Object.entries(people)}}`
+// { ABC: 'Aidan', DEF: 'Becca' }
+```
+
 ## Installation
 ```
 $ npm install comprehensive

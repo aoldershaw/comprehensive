@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-// Matches 'for name of' strings, and captures the variable name
-var FOR_REGEX = /^for\s+([A-Za-z_\$][A-Za-z0-9-_\$]*)\s+of/;
+// Matches 'for name1, name2, ... of' strings, and captures the variable name(s)
+var FOR_REGEX = /^for\s+([A-Za-z_\$][A-Za-z0-9-_\$]*(\s*,\s*[A-Za-z_\$][A-Za-z0-9-_\$]*)*)\s+of/;
 // Matches property chains (e.g. anObject.subObject.property)
 var FIELD_REGEX = /^[A-Za-z_$][A-Za-z0-9-_$]*(?:\.[A-Za-z_$][A-Za-z0-9-_$]*)*/;
 function handleReference(ref, context) {
@@ -41,16 +41,17 @@ function parseRef(s) {
         throw new Error("Invalid reference format");
     return { expr: match[0] };
 }
-function parseFieldName(s) {
+function parseFieldNames(s) {
     var match;
     if (s.substr(0, 4) === 'over') {
-        return 'it';
+        return ['it'];
     }
     else if ((match = FOR_REGEX.exec(s)) != null) {
-        return match[1];
+        var names = match[1].split(',').map(function (s) { return s.trim(); });
+        return names;
     }
     else {
-        throw new Error("Invalid iteration operator. Expecting either 'for ... of' or 'over'");
+        throw new Error("Invalid iteration operator. Expecting either 'for ... of' or 'over', provided " + s);
     }
 }
 function toObj(strings) {
@@ -88,7 +89,8 @@ function toObj(strings) {
         value = parseRef(s);
         s = s.substr(value.expr.length).trim();
     }
-    var fieldName = parseFieldName(s);
+    var fieldNames = parseFieldNames(s);
+    var hasMultipleFields = fieldNames.length > 1;
     var object = {};
     var context = {};
     var list = values[valueIndex];
@@ -96,7 +98,15 @@ function toObj(strings) {
         throw new Error("An invalid array was passed (provided " + list + ")");
     for (var _a = 0, list_1 = list; _a < list_1.length; _a++) {
         var entry = list_1[_a];
-        context[fieldName] = entry;
+        if (hasMultipleFields) {
+            if (entry == null || !Array.isArray(entry) || entry.length !== fieldNames.length)
+                throw new Error("Cannot spread value " + entry + " into fields [" + fieldNames.join(', ') + "]");
+            for (var i = 0; i < fieldNames.length; i++)
+                context[fieldNames[i]] = entry[i];
+        }
+        else {
+            context[fieldNames[0]] = entry;
+        }
         var curKey = evaluateKeyExpression(key, entry, context, !hasKeyExpression);
         if (typeof curKey !== 'string' && typeof curKey !== 'number')
             throw new Error('Key must be either a string or a number, not a(n) ' + typeof curKey);
