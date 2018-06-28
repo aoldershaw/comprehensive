@@ -13,7 +13,6 @@ const ages = {
 }
 
 describe('toObj', () => {
-
     it('should return an object', () => {
         expect(toObj`{it: it over ${[1, 2, 3]}}`).toMatchObject({1: 1, 2: 2, 3: 3});
     })
@@ -67,13 +66,31 @@ describe('toObj', () => {
             Becca: 22,
             Liam: 23
         });
+    });
+
+    it('should allow for value spreading', () => {
+        expect(toObj`key: value.c for key, value of ${Object.entries({a: {c: 123}, b: {c: 456}})}`).toMatchObject({
+            a: 123,
+            b: 456
+        });
+        const list = [['a', 1, 2, 3], 
+                      ['b', 4, 5, 6]];
+        expect(toObj`key: ${([_, a, b, c]) => a + b + c} for key,a , b, c of ${list}`).toMatchObject({
+            'a': 1 + 2 + 3,
+            'b': 4 + 5 + 6
+        })
     })
 
+    it('should throw if invalid value spread length', () => {
+        const list = [[1, 2], [3]];
+        expect(() => toObj`{a: b for a, b of ${list}}`).toThrow();
+    });
+
     it('should ignore (most) whitespace', () => {
-        expect(toObj`{it.name: it over ${people}`).toMatchObject(toObj`     {
+        expect(toObj`{it.name: it over ${people}}`).toMatchObject(toObj`     {
             it.name          :          it
             over
-            ${people}
+                        ${people}
         }`)
     });
 
@@ -110,6 +127,8 @@ describe('toObjSafe', () => {
         expect(() => toObjSafe`{ : it over ${people}`).not.toThrow();
         expect(() => toObjSafe`{it.name: over ${people}`).not.toThrow();
         expect(() => toObjSafe`{it.name: it ${people}`).not.toThrow();
+
+
     })
 
     it('should return null on invalid input', () => {

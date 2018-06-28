@@ -2,8 +2,8 @@ interface Reference {
     expr: string;
 }
 declare type Value = string | number | boolean | Object | Array<any>;
-declare type KeyFunction = (any: any) => string;
-declare type ValueFunction = (any: any) => Value;
+declare type KeyFunction = (arg: any) => string;
+declare type ValueFunction = (arg: any) => Value;
 declare type KeyExpression = KeyFunction | Reference | string;
 declare type ValueExpression = ValueFunction | Reference | Value;
 export declare function toObj(strings: TemplateStringsArray, array: Array<any>): object;
