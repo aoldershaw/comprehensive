@@ -1,31 +1,32 @@
 // Matches 'for name1, name2, ... of' strings, and captures the variable name(s)
 const FOR_REGEX = /^for\s+([A-Za-z_\$][A-Za-z0-9-_\$]*(\s*,\s*[A-Za-z_\$][A-Za-z0-9-_\$]*)*)\s+of/;
 // Matches property chains (e.g. anObject.subObject.property)
-const FIELD_REGEX = /^[A-Za-z_$][A-Za-z0-9-_$]*(?:\.[A-Za-z_$][A-Za-z0-9-_$]*)*/
-
-interface Context {
-    [name: string]: any;
-}
+const FIELD_REGEX = /^[A-Za-z_$][A-Za-z0-9-_$]*(?:\.[A-Za-z_$][A-Za-z0-9-_$]*)*/;
 
 interface Reference {
+    parts: string[];
     expr: string;
 }
 
 type Key = string | Reference;
 type Value = string | number | boolean | Object | Array<any>;
-type KeyFunction = (arg: any) => string;
-type ValueFunction = (arg: any) => Value;
-type KeyExpression = KeyFunction | Reference | string;
-type ValueExpression = ValueFunction | Reference | Value
+type KeyProvider = (arg: any) => string;
+type ValueProvider = (arg: any) => Value;
+type KeyExpression = KeyProvider | Reference | string;
+type ValueExpression = ValueProvider | Reference | Value
 
-function handleReference(ref: Reference, context: Context): any {
-    const parts = ref.expr.split('.');
-    let cur = context;
-    for(const part of parts) {
-        cur = cur[part];
-        if(cur === undefined) return cur;
+function handleReferenceFunction(ref: Reference, fieldNames: string[]): KeyProvider | ValueProvider {
+    const index = fieldNames.indexOf(ref.parts[0]);
+    if(index < 0) throw new Error(`Invalid field name ${ref.parts[0]}`);
+    const hasMultipleFields = fieldNames.length > 1;
+    return (entry) => {
+        let cur = hasMultipleFields ? entry[index] : entry;
+        for(let i = 1; i < ref.parts.length; i++) {
+            cur = cur[ref.parts[i]];
+            if(cur === undefined) return cur;
+        }
+        return cur;
     }
-    return cur;
 }
 
 function ltrim(s: string, c: string) {
@@ -36,22 +37,16 @@ function isFunction(o: any) {
     return typeof o === 'function';
 }
 
-function evaluateKeyExpression(ke: KeyExpression, entry: any, context: Context, isReference: boolean): string {
-    if(isReference) return handleReference(<Reference> ke, context);
-    if(isFunction(ke)) return (<KeyFunction> ke)(entry);
-    return <string> ke;
-}
-
-function evaluateValueExpression(ve: ValueExpression, entry: any, context: Context, isReference: boolean): Value {
-    if(isReference) return handleReference(<Reference> ve, context);
-    if(isFunction(ve)) return (<ValueFunction> ve)(entry);
-    return <Value> ve;
+function obtainProvider(e: KeyExpression | ValueExpression, isReference: boolean, fieldNames: string[]): KeyProvider | ValueProvider {
+    if(isReference) return handleReferenceFunction(<Reference> e, fieldNames);
+    if(isFunction(e)) return <KeyProvider | ValueProvider> e;
+    return () => <string | Value> e;
 }
 
 function parseRef(s: string): Reference {
     let match = FIELD_REGEX.exec(s);
     if(match == null) throw new Error("Invalid reference format");
-    return {expr: match[0]};
+    return {parts: match[0].split('.'), expr: match[0]};
 }
 
 function parseFieldNames(s: string): string[] {
@@ -98,24 +93,16 @@ export function toObj(strings: TemplateStringsArray, ...values: Array<any>): obj
         s = s.substr((<Reference> value).expr.length).trim();
     }
     const fieldNames = parseFieldNames(s);
-    const hasMultipleFields = fieldNames.length > 1;
+    const keyFn = <KeyProvider> obtainProvider(key, !hasKeyExpression, fieldNames);
+    const valueFn = <ValueProvider> obtainProvider(value, !hasValueExpression, fieldNames);
     const object = {};
-    const context: Context = {};
     const list = values[valueIndex]
     if(list == null || !Array.isArray(list)) throw new Error(`An invalid array was passed (provided ${list})`);
     for(const entry of list) {
-        if(hasMultipleFields) {
-            if(entry == null || !Array.isArray(entry) || entry.length !== fieldNames.length)
-                throw new Error(`Cannot spread value ${entry} into fields [${fieldNames.join(', ')}]`)
-            for(let i = 0; i < fieldNames.length; i++)
-                context[fieldNames[i]] = entry[i];
-        } else {
-            context[fieldNames[0]] = entry;
-        }
-        const curKey = evaluateKeyExpression(key, entry, context, !hasKeyExpression);
+        const curKey = keyFn(entry);
         if(typeof curKey !== 'string' && typeof curKey !== 'number')
             throw new Error('Key must be either a string or a number, not a(n) ' + typeof curKey);
-        object[curKey] = evaluateValueExpression(value, entry, context, !hasValueExpression);
+        object[curKey] = valueFn(entry);
     }
     return object;
 }
