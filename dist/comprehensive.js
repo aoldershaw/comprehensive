@@ -4,16 +4,20 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var FOR_REGEX = /^for\s+([A-Za-z_\$][A-Za-z0-9-_\$]*(\s*,\s*[A-Za-z_\$][A-Za-z0-9-_\$]*)*)\s+of/;
 // Matches property chains (e.g. anObject.subObject.property)
 var FIELD_REGEX = /^[A-Za-z_$][A-Za-z0-9-_$]*(?:\.[A-Za-z_$][A-Za-z0-9-_$]*)*/;
-function handleReference(ref, context) {
-    var parts = ref.expr.split('.');
-    var cur = context;
-    for (var _i = 0, parts_1 = parts; _i < parts_1.length; _i++) {
-        var part = parts_1[_i];
-        cur = cur[part];
-        if (cur === undefined)
-            return cur;
-    }
-    return cur;
+function handleReferenceFunction(ref, fieldNames) {
+    var index = fieldNames.indexOf(ref.parts[0]);
+    if (index < 0)
+        throw new Error("Invalid field name " + ref.parts[0]);
+    var hasMultipleFields = fieldNames.length > 1;
+    return function (entry) {
+        var cur = hasMultipleFields ? entry[index] : entry;
+        for (var i = 1; i < ref.parts.length; i++) {
+            cur = cur[ref.parts[i]];
+            if (cur === undefined)
+                return cur;
+        }
+        return cur;
+    };
 }
 function ltrim(s, c) {
     return s.replace(new RegExp("^" + c + "+"), '');
@@ -21,25 +25,18 @@ function ltrim(s, c) {
 function isFunction(o) {
     return typeof o === 'function';
 }
-function evaluateKeyExpression(ke, entry, context, isReference) {
+function obtainProvider(e, isReference, fieldNames) {
     if (isReference)
-        return handleReference(ke, context);
-    if (isFunction(ke))
-        return ke(entry);
-    return ke;
-}
-function evaluateValueExpression(ve, entry, context, isReference) {
-    if (isReference)
-        return handleReference(ve, context);
-    if (isFunction(ve))
-        return ve(entry);
-    return ve;
+        return handleReferenceFunction(e, fieldNames);
+    if (isFunction(e))
+        return e;
+    return function () { return e; };
 }
 function parseRef(s) {
     var match = FIELD_REGEX.exec(s);
     if (match == null)
         throw new Error("Invalid reference format");
-    return { expr: match[0] };
+    return { parts: match[0].split('.'), expr: match[0] };
 }
 function parseFieldNames(s) {
     var match;
@@ -90,27 +87,18 @@ function toObj(strings) {
         s = s.substr(value.expr.length).trim();
     }
     var fieldNames = parseFieldNames(s);
-    var hasMultipleFields = fieldNames.length > 1;
+    var keyFn = obtainProvider(key, !hasKeyExpression, fieldNames);
+    var valueFn = obtainProvider(value, !hasValueExpression, fieldNames);
     var object = {};
-    var context = {};
     var list = values[valueIndex];
     if (list == null || !Array.isArray(list))
         throw new Error("An invalid array was passed (provided " + list + ")");
     for (var _a = 0, list_1 = list; _a < list_1.length; _a++) {
         var entry = list_1[_a];
-        if (hasMultipleFields) {
-            if (entry == null || !Array.isArray(entry) || entry.length !== fieldNames.length)
-                throw new Error("Cannot spread value " + entry + " into fields [" + fieldNames.join(', ') + "]");
-            for (var i = 0; i < fieldNames.length; i++)
-                context[fieldNames[i]] = entry[i];
-        }
-        else {
-            context[fieldNames[0]] = entry;
-        }
-        var curKey = evaluateKeyExpression(key, entry, context, !hasKeyExpression);
+        var curKey = keyFn(entry);
         if (typeof curKey !== 'string' && typeof curKey !== 'number')
             throw new Error('Key must be either a string or a number, not a(n) ' + typeof curKey);
-        object[curKey] = evaluateValueExpression(value, entry, context, !hasValueExpression);
+        object[curKey] = valueFn(entry);
     }
     return object;
 }

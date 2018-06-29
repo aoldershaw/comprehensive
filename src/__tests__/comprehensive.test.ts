@@ -81,9 +81,22 @@ describe('toObj', () => {
         })
     })
 
-    it('should throw if invalid value spread length', () => {
-        const list = [[1, 2], [3]];
-        expect(() => toObj`{a: b for a, b of ${list}}`).toThrow();
+    it('should not throw if invalid value spread length', () => {
+        const list = [[1, 2], [3, 4, 5], [6]];
+        expect(toObj`{a: b for a, b of ${list}}`).toMatchObject({
+            1: 2,
+            3: 4,
+            6: undefined,
+        });
+        expect(toObj`{${([a, b]) => a + b}: ${([a, b]) => a * b} for a, b of ${list}}`).toMatchObject({
+            3: 2,
+            7: 12,
+            'NaN': NaN
+        })
+    });
+
+    it('should throw if trying to unpack a non-array', () => {
+        expect(() => toObj`${([a, ]) => a}: ${([, b]) => b} over ${[1, 2, 3]}`).toThrow();
     });
 
     it('should ignore (most) whitespace', () => {
