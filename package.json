@@ -1,6 +1,6 @@
 {
   "name": "comprehensive",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "main": "dist/comprehensive.js",
   "files": [
     "/dist/comprehensive.js",

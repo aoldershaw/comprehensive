@@ -60,15 +60,16 @@ You can also include [dist/comprehensive.min.js](https://github.com/aoldershaw/c
 ## Usage
 Basic syntax is as follows:
 ```
-toObj`{key: value for variable of ${someArray}}`
-toObj`{key: value over ${someArray}}`
+toObj`{k: v for var1, (var2, ...) of ${someArray}}`
+toObj`{k: v over ${someArray}}`
+toObj`{k: v for key in ${someObject}}`
 ```
 
-where key and value can either be a property path (e.g. `a.b.c`), a function (e.g. `${a => a.b.c.toLowerCase()}`), or a static value (e.g. `${123}`). The key must either be a `string` or a `number`, otherwise `toObj` will throw. It will also throw if the syntax is invalid.
+where `k` and `v` can either be a property path (e.g. `a.b.c`), a function (e.g. `${a => a.b.c.toLowerCase()}`), or a static value (e.g. `${123}`). The key must either be a `string` or a `number`, otherwise `toObj` will throw. It will also throw if the syntax is invalid.
 
 If you want to ensure the call never throws, you can use `toObjSafe`, which will return `null` on invalid input.
 
-Note that `toObj` does not require curly brackets, and added whitespace is allowed.
+Note that `toObj` does not require curly brackets, and extra whitespace is allowed.
 
 ### Examples
 #### Basic Example
