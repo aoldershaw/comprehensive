@@ -37,6 +37,19 @@ const idMap = toObj`{id: person.name for id, person of ${Object.entries(people)}
 // { ABC: 'Aidan', DEF: 'Becca' }
 ```
 
+Or, you can iterate over the keys of an object using the `for key in` construct.
+
+```
+const places = {
+    Toronto: {population: 2809000}, 
+    Montreal: {population: 1714000}
+}
+toObj`{city: ${city => places[key].population} for key in ${places}`
+// {Toronto: 2809000, Montreal: 1714000}
+```
+
+This is a shorthand for `for city of ${Object.keys(places)}`.
+
 ## Installation
 ```
 $ npm install comprehensive
@@ -85,6 +98,27 @@ const people = [{name: 'Daniel', hobby: 'Karate'}];
 
 toObj`${p => `${p.name}-san`}: p for p of ${people}`;
 // {'Daniel-san': {name: 'Daniel', hobby: 'Karate'}}
+```
+
+#### Iterate Over Object
+```
+const movie2Id = {'Shrek': 'tt0126029', 'Shrek 2': 'tt0298148'};
+const id2Movie = toObj`{id: title for title, id of ${Object.entries(movie2Id)}}`;
+// {tt0126029: 'Shrek', tt0298148: 'Shrek 2'}
+```
+
+or
+
+```
+const id2Movie = toObj`{${title => movie2Id[title]}: title for title in ${movie2Id}}}`;
+// {tt0126029: 'Shrek', tt0298148: 'Shrek 2'}
+```
+
+or
+
+```
+const id2Movie = toObj`{${title => movie2Id[title]}: title for title of ${Object.keys(movie2Id)}}}`;
+// {tt0126029: 'Shrek', tt0298148: 'Shrek 2'}
 ```
 
 #### Nested Object Comprehensions

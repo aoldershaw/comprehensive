@@ -99,6 +99,23 @@ describe('toObj', () => {
         expect(() => toObj`${([a, ]) => a}: ${([, b]) => b} over ${[1, 2, 3]}`).toThrow();
     });
 
+    it('should support iterating over keys with the "in" operator', () => {
+        expect(toObj`name: ${name => ages[name]} for name in ${ages}`).toMatchObject(ages);
+        expect(toObj`i: i for i in ${['a', 'b', 'c']}`).toMatchObject({0: '0', 1: '1', 2: '2'});
+    });
+
+    it('should throw if trying to spread multiple names using the "in" operator', () => {
+        expect(() => toObj`i: j for i, j in ${[[1, 2], [3, 4]]}`).toThrow();
+    });
+
+    it('should throw if trying to traverse a key (from the "in" operator)', () => {
+        expect(() => toObj`i: i.illegal for i in ${{a: 1, b: 2}}`).toThrow();
+    });
+
+    it('should throw if trying to reference an invalid field name', () => {
+        expect(() => toObj`fake: fake for i in ${[1, 2]}`).toThrow();
+    });
+
     it('should ignore (most) whitespace', () => {
         expect(toObj`{it.name: it over ${people}}`).toMatchObject(toObj`     {
             it.name          :          it

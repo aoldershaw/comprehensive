@@ -1,6 +1,6 @@
 {
   "name": "comprehensive",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "main": "dist/comprehensive.js",
   "files": [
     "/dist/comprehensive.js",
@@ -24,16 +24,14 @@
   ],
   "author": "Aidan Oldershaw <aidan.oldershaw@mail.mcgill.ca>",
   "license": "MIT",
-  "dependencies": {
-    "@types/node": "^10.3.6",
-    "uglify-js": "^3.4.1"
-  },
+  "dependencies": {},
   "devDependencies": {
     "@types/jest": "^23.1.1",
     "awesome-typescript-loader": "^5.2.0",
     "jest": "^23.1.0",
     "ts-jest": "^22.4.6",
-    "typescript": "^2.9.2"
+    "typescript": "^2.9.2",
+    "uglify-js": "^3.4.2"
   },
   "description": "Python-inspired object (dictionary) comprehension in JavaScript",
   "repository": {
