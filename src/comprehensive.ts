@@ -1,11 +1,21 @@
-// Matches 'for name1, name2, ... of' strings, and captures the variable name(s)
-const FOR_REGEX = /^for\s+([A-Za-z_\$][A-Za-z0-9-_\$]*(\s*,\s*[A-Za-z_\$][A-Za-z0-9-_\$]*)*)\s+of/;
+// Matches 'for name1, name2, ... of/in' strings, and captures the variable name(s)
+const FOR_REGEX = /^for\s+([A-Za-z_\$][A-Za-z0-9-_\$]*(\s*,\s*[A-Za-z_\$][A-Za-z0-9-_\$]*)*)\s+(in|of)/;
 // Matches property chains (e.g. anObject.subObject.property)
 const FIELD_REGEX = /^[A-Za-z_$][A-Za-z0-9-_$]*(?:\.[A-Za-z_$][A-Za-z0-9-_$]*)*/;
 
 interface Reference {
     parts: string[];
     expr: string;
+}
+
+enum FieldType {
+    OF = 'of',
+    IN = 'in',
+}
+
+interface Fields {
+    names: string[];
+    type: FieldType;
 }
 
 type Key = string | Reference;
@@ -15,10 +25,12 @@ type ValueProvider = (arg: any) => Value;
 type KeyExpression = KeyProvider | Reference | string;
 type ValueExpression = ValueProvider | Reference | Value
 
-function handleReferenceFunction(ref: Reference, fieldNames: string[]): KeyProvider | ValueProvider {
-    const index = fieldNames.indexOf(ref.parts[0]);
+function handleReferenceFunction(ref: Reference, fields: Fields): KeyProvider | ValueProvider {
+    if(fields.type === 'in' && ref.parts.length > 1)
+        throw `You cannot traverse the key ${ref.parts[0]}`;
+    const index = fields.names.indexOf(ref.parts[0]);
     if(index < 0) throw new Error(`Invalid field name ${ref.parts[0]}`);
-    const hasMultipleFields = fieldNames.length > 1;
+    const hasMultipleFields = fields.names.length > 1;
     return (entry) => {
         let cur = hasMultipleFields ? entry[index] : entry;
         for(let i = 1; i < ref.parts.length; i++) {
@@ -30,15 +42,20 @@ function handleReferenceFunction(ref: Reference, fieldNames: string[]): KeyProvi
 }
 
 function ltrim(s: string, c: string) {
-    return s.replace(new RegExp(`^${c}+`), '');
+    let i = 0;
+    const strLen = s.length;
+    while(i < strLen && s.charAt(i) === c) {
+        i++;
+    }
+    return s.substr(i);
 }
 
 function isFunction(o: any) {
     return typeof o === 'function';
 }
 
-function obtainProvider(e: KeyExpression | ValueExpression, isReference: boolean, fieldNames: string[]): KeyProvider | ValueProvider {
-    if(isReference) return handleReferenceFunction(<Reference> e, fieldNames);
+function obtainProvider(e: KeyExpression | ValueExpression, isReference: boolean, fields: Fields): KeyProvider | ValueProvider {
+    if(isReference) return handleReferenceFunction(<Reference> e, fields);
     if(isFunction(e)) return <KeyProvider | ValueProvider> e;
     return () => <string | Value> e;
 }
@@ -49,22 +66,25 @@ function parseRef(s: string): Reference {
     return {parts: match[0].split('.'), expr: match[0]};
 }
 
-function parseFieldNames(s: string): string[] {
+function parseFields(s: string): Fields {
     let match;
     if(s.substr(0, 4) === 'over') {
-        return ['it'];
+        return {names: ['it'], type: FieldType.OF};
     } else if((match = FOR_REGEX.exec(s)) != null) {
         const names = match[1].split(',').map(s => s.trim());
-        return names;
+        const type: FieldType = match[3];
+        if(type === FieldType.IN && names.length > 1)
+            throw new Error("Cannot spread multiple fields with the 'in' operator");
+        return {names, type};
     } else {
-        throw new Error("Invalid iteration operator. Expecting either 'for ... of' or 'over', provided " + s)
+        throw new Error("Invalid iteration operator. Expecting either 'for ... of', 'for ... in', or 'over'")
     }
 }
 
-export function toObj(strings: TemplateStringsArray, array: Array<any>): object;
-export function toObj(strings: TemplateStringsArray, key: KeyExpression, array: Array<any>): object;
-export function toObj(strings: TemplateStringsArray, value: ValueExpression, array: Array<any>): object;
-export function toObj(strings: TemplateStringsArray, key: KeyExpression, value: ValueExpression, array: Array<any>): object;
+export function toObj(strings: TemplateStringsArray, object: object): object;
+export function toObj(strings: TemplateStringsArray, key: KeyExpression, object: object): object;
+export function toObj(strings: TemplateStringsArray, value: ValueExpression, object: object): object;
+export function toObj(strings: TemplateStringsArray, key: KeyExpression, value: ValueExpression, object: object): object;
 
 export function toObj(strings: TemplateStringsArray, ...values: Array<any>): object {
     let s = ltrim(strings[0].trim(), '{').trim();
@@ -92,11 +112,11 @@ export function toObj(strings: TemplateStringsArray, ...values: Array<any>): obj
         value = parseRef(s);
         s = s.substr((<Reference> value).expr.length).trim();
     }
-    const fieldNames = parseFieldNames(s);
-    const keyFn = <KeyProvider> obtainProvider(key, !hasKeyExpression, fieldNames);
-    const valueFn = <ValueProvider> obtainProvider(value, !hasValueExpression, fieldNames);
+    const fields = parseFields(s);
+    const keyFn = <KeyProvider> obtainProvider(key, !hasKeyExpression, fields);
+    const valueFn = <ValueProvider> obtainProvider(value, !hasValueExpression, fields);
     const object = {};
-    const list = values[valueIndex]
+    const list = fields.type === FieldType.OF ? values[valueIndex] : Object.keys(values[valueIndex]);
     if(list == null || !Array.isArray(list)) throw new Error(`An invalid array was passed (provided ${list})`);
     for(const entry of list) {
         const curKey = keyFn(entry);
@@ -107,10 +127,10 @@ export function toObj(strings: TemplateStringsArray, ...values: Array<any>): obj
     return object;
 }
 
-export function toObjSafe(strings: TemplateStringsArray, array: Array<any>): object;
-export function toObjSafe(strings: TemplateStringsArray, key: KeyExpression, array: Array<any>): object;
-export function toObjSafe(strings: TemplateStringsArray, value: ValueExpression, array: Array<any>): object;
-export function toObjSafe(strings: TemplateStringsArray, key: KeyExpression, value: ValueExpression, array: Array<any>): object;
+export function toObjSafe(strings: TemplateStringsArray, object: object): object;
+export function toObjSafe(strings: TemplateStringsArray, key: KeyExpression, object: object): object;
+export function toObjSafe(strings: TemplateStringsArray, value: ValueExpression, object: object): object;
+export function toObjSafe(strings: TemplateStringsArray, key: KeyExpression, value: ValueExpression, object: object): object;
 
 export function toObjSafe(strings: TemplateStringsArray, ...values: Array<any>): object {
     try {
