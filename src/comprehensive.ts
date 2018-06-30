@@ -81,12 +81,7 @@ function parseFields(s: string): Fields {
     }
 }
 
-export function toObj(strings: TemplateStringsArray, object: object): object;
-export function toObj(strings: TemplateStringsArray, key: KeyExpression, object: object): object;
-export function toObj(strings: TemplateStringsArray, value: ValueExpression, object: object): object;
-export function toObj(strings: TemplateStringsArray, key: KeyExpression, value: ValueExpression, object: object): object;
-
-export function toObj(strings: TemplateStringsArray, ...values: Array<any>): object {
+export function parseExpression(strings: TemplateStringsArray, ...values: Array<any>) {
     let s = ltrim(strings[0].trim(), '{').trim();
     let valueIndex = 0;
     let stringIndex = 1;
@@ -115,9 +110,23 @@ export function toObj(strings: TemplateStringsArray, ...values: Array<any>): obj
     const fields = parseFields(s);
     const keyFn = <KeyProvider> obtainProvider(key, !hasKeyExpression, fields);
     const valueFn = <ValueProvider> obtainProvider(value, !hasValueExpression, fields);
-    const object = {};
     const list = fields.type === FieldType.OF ? values[valueIndex] : Object.keys(values[valueIndex]);
     if(list == null || !Array.isArray(list)) throw new Error(`An invalid array was passed (provided ${list})`);
+    return {
+        keyFn,
+        valueFn,
+        list,
+    }
+}
+
+export function toObj(strings: TemplateStringsArray, object: object): object;
+export function toObj(strings: TemplateStringsArray, key: KeyExpression, object: object): object;
+export function toObj(strings: TemplateStringsArray, value: ValueExpression, object: object): object;
+export function toObj(strings: TemplateStringsArray, key: KeyExpression, value: ValueExpression, object: object): object;
+
+export function toObj(strings: TemplateStringsArray, ...values: Array<any>): object {
+    const object = {};
+    const {list, keyFn, valueFn} = parseExpression(strings, values);
     for(const entry of list) {
         const curKey = keyFn(entry);
         if(typeof curKey !== 'string' && typeof curKey !== 'number')
