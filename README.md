@@ -44,7 +44,7 @@ const places = {
     Toronto: {population: 2809000}, 
     Montreal: {population: 1714000}
 }
-toObj`{city: ${city => places[key].population} for key in ${places}`
+toObj`{city: ${city => places[city].population} for city in ${places}`
 // {Toronto: 2809000, Montreal: 1714000}
 ```
 
