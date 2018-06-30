@@ -66,7 +66,7 @@ function parseFields(s) {
         throw new Error("Invalid iteration operator. Expecting either 'for ... of', 'for ... in', or 'over'");
     }
 }
-function toObj(strings) {
+function parseExpression(strings) {
     var values = [];
     for (var _i = 1; _i < arguments.length; _i++) {
         values[_i - 1] = arguments[_i];
@@ -104,12 +104,25 @@ function toObj(strings) {
     var fields = parseFields(s);
     var keyFn = obtainProvider(key, !hasKeyExpression, fields);
     var valueFn = obtainProvider(value, !hasValueExpression, fields);
-    var object = {};
     var list = fields.type === FieldType.OF ? values[valueIndex] : Object.keys(values[valueIndex]);
     if (list == null || !Array.isArray(list))
         throw new Error("An invalid array was passed (provided " + list + ")");
-    for (var _a = 0, list_1 = list; _a < list_1.length; _a++) {
-        var entry = list_1[_a];
+    return {
+        keyFn: keyFn,
+        valueFn: valueFn,
+        list: list,
+    };
+}
+exports.parseExpression = parseExpression;
+function toObj(strings) {
+    var values = [];
+    for (var _i = 1; _i < arguments.length; _i++) {
+        values[_i - 1] = arguments[_i];
+    }
+    var object = {};
+    var _a = parseExpression.apply(void 0, [strings].concat(values)), keyFn = _a.keyFn, valueFn = _a.valueFn, list = _a.list;
+    for (var _b = 0, list_1 = list; _b < list_1.length; _b++) {
+        var entry = list_1[_b];
         var curKey = keyFn(entry);
         if (typeof curKey !== 'string' && typeof curKey !== 'number')
             throw new Error('Key must be either a string or a number, not a(n) ' + typeof curKey);

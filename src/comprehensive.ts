@@ -126,7 +126,7 @@ export function toObj(strings: TemplateStringsArray, key: KeyExpression, value: 
 
 export function toObj(strings: TemplateStringsArray, ...values: Array<any>): object {
     const object = {};
-    const {list, keyFn, valueFn} = parseExpression(strings, values);
+    const {keyFn, valueFn, list} = parseExpression(strings, ...values);
     for(const entry of list) {
         const curKey = keyFn(entry);
         if(typeof curKey !== 'string' && typeof curKey !== 'number')
