@@ -1,4 +1,4 @@
-import { toObj, toObjSafe } from "../comprehensive";
+import toObj, { toObjSafe } from "../comprehensive";
 
 const people = [
     {name: 'Aidan', age: 20},

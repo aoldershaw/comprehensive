@@ -27,7 +27,7 @@ type ValueExpression = ValueProvider | Reference | Value
 
 function handleReferenceFunction(ref: Reference, fields: Fields): KeyProvider | ValueProvider {
     if(fields.type === 'in' && ref.parts.length > 1)
-        throw `You cannot traverse the key ${ref.parts[0]}`;
+        throw new Error(`You cannot traverse the key ${ref.parts[0]}`);
     const index = fields.names.indexOf(ref.parts[0]);
     if(index < 0) throw new Error(`Invalid field name ${ref.parts[0]}`);
     const hasMultipleFields = fields.names.length > 1;
@@ -81,7 +81,7 @@ function parseFields(s: string): Fields {
     }
 }
 
-export function parseExpression(strings: TemplateStringsArray, ...values: Array<any>) {
+function parseExpression(strings: TemplateStringsArray, ...values: Array<any>) {
     let s = ltrim(strings[0].trim(), '{').trim();
     let valueIndex = 0;
     let stringIndex = 1;
@@ -119,12 +119,12 @@ export function parseExpression(strings: TemplateStringsArray, ...values: Array<
     }
 }
 
-export function toObj(strings: TemplateStringsArray, object: object): object;
-export function toObj(strings: TemplateStringsArray, key: KeyExpression, object: object): object;
-export function toObj(strings: TemplateStringsArray, value: ValueExpression, object: object): object;
-export function toObj(strings: TemplateStringsArray, key: KeyExpression, value: ValueExpression, object: object): object;
+export default function toObj(strings: TemplateStringsArray, object: object): object;
+export default function toObj(strings: TemplateStringsArray, key: KeyExpression, object: object): object;
+export default function toObj(strings: TemplateStringsArray, value: ValueExpression, object: object): object;
+export default function toObj(strings: TemplateStringsArray, key: KeyExpression, value: ValueExpression, object: object): object;
 
-export function toObj(strings: TemplateStringsArray, ...values: Array<any>): object {
+export default function toObj(strings: TemplateStringsArray, ...values: Array<any>): object {
     const object = {};
     const {keyFn, valueFn, list} = parseExpression(strings, ...values);
     for(const entry of list) {

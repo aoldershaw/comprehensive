@@ -11,7 +11,7 @@ var FieldType;
 })(FieldType || (FieldType = {}));
 function handleReferenceFunction(ref, fields) {
     if (fields.type === 'in' && ref.parts.length > 1)
-        throw "You cannot traverse the key " + ref.parts[0];
+        throw new Error("You cannot traverse the key " + ref.parts[0]);
     var index = fields.names.indexOf(ref.parts[0]);
     if (index < 0)
         throw new Error("Invalid field name " + ref.parts[0]);
@@ -113,7 +113,6 @@ function parseExpression(strings) {
         list: list,
     };
 }
-exports.parseExpression = parseExpression;
 function toObj(strings) {
     var values = [];
     for (var _i = 1; _i < arguments.length; _i++) {
@@ -130,7 +129,7 @@ function toObj(strings) {
     }
     return object;
 }
-exports.toObj = toObj;
+exports.default = toObj;
 function toObjSafe(strings) {
     var values = [];
     for (var _i = 1; _i < arguments.length; _i++) {
