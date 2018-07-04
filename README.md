@@ -5,7 +5,7 @@ Lightweight (1KB gzipped) Python-inspired object (dictionary) comprehension for 
 `comprehensive` provides a syntax for object comprehension in Javascript similar to Python's dictionary comprehension.
 
 ```
-import { toObj } from 'comprehensive';
+import toObj from 'comprehensive';
 const people = [{name: 'Aidan', age: 20}, {name: 'Becca', age: 21}];
 
 const ages = toObj`{person.name: person.age for person of ${people}}`;
@@ -74,7 +74,7 @@ Note that `toObj` does not require curly brackets, and extra whitespace is allow
 ### Examples
 #### Basic Example
 ```
-import { toObj } from 'comprehensive';
+import toObj from 'comprehensive';
 const people = [{name: 'Aidan', age: 20}, {name: 'Becca', age: 21}];
 
 const personLookup = toObj`{p.name: p for p of ${people}}`;
