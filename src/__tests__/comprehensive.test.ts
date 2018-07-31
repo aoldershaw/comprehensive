@@ -33,9 +33,11 @@ describe('toObj', () => {
         }
 
         expect(toObj`{person.name: ${true} for person of ${people}}`).toMatchObject(withValue(true));
+        expect(toObj`{it.name: ${false} over ${people}`).toMatchObject(withValue(false));
+        expect(toObj`{it.name: ${null} over ${people}`).toMatchObject(withValue(null));
         expect(toObj`{person.name: ${[1, 2, 3]} for person of ${people}}`).toMatchObject(withValue([1, 2, 3]));
         expect(toObj`{person.name: ${{a: 123, b: 456}} for person of ${people}}`).toMatchObject(withValue({a: 123, b: 456}));
-        expect(toObj`{${'test'}: ${123} over ${people}`).toMatchObject({test: 123})
+        expect(toObj`{${'test'}: ${123} over ${people}`).toMatchObject({test: 123});
     })
 
     it(`shouldn't be fooled by static values looking like the internal Reference type`, () => {
