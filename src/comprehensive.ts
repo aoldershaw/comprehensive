@@ -89,7 +89,7 @@ function parseExpression(strings: TemplateStringsArray, ...values: Array<any>) {
     let key: Key;
     if(hasKeyExpression) {
         key = values[valueIndex++];
-        if(key == null) throw new Error("Expecting a key");
+        if(key === undefined) throw new Error("Expecting a key");
         s = strings[stringIndex++].trim();
     } else {
         key = parseRef(s);
@@ -101,7 +101,7 @@ function parseExpression(strings: TemplateStringsArray, ...values: Array<any>) {
     let value: Value;
     if(hasValueExpression) {
         value = values[valueIndex++];
-        if(!value) throw new Error("Expecting a value");
+        if(value === undefined) throw new Error("Expecting a value");
         s = strings[stringIndex++].trim();
     } else {
         value = parseRef(s);
